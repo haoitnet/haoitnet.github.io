@@ -1,15 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Trang web PHP</title>
+  <meta charset="UTF-8">
+  <title>Docker Compose Generator</title>
 </head>
 <body>
-    <h1>Xin chào thế giới!</h1>
-  <button onclick="alert('Xin chào')">
-  <script>
-    alert("Warning!");
-  </script>
-<?php echo "PHP Hello"; ?>
+  <form action="/" method="post">
+    <div class="form-group">
+      <label for="image">Docker image</label>
+      <input type="text" class="form-control" id="image" name="image">
+    </div>
+    <div class="form-group">
+      <label for="volumes">Volumes</label>
+      <input type="text" class="form-control" id="volumes" name="volumes">
+    </div>
+    <div class="form-group">
+      <label for="ports">Ports</label>
+      <input type="text" class="form-control" id="ports" name="ports">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
 </body>
 </html>
+
+
+<script lang="JavaScript">
+const form = document.querySelector("form");
+const imageInput = document.querySelector("#image");
+const volumesInput = document.querySelector("#volumes");
+const portsInput = document.querySelector("#ports");
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const image = imageInput.value;
+  const volumes = volumesInput.value.split("\n");
+  const ports = portsInput.value.split(",");
+
+  const compose = {
+    version: "3.8",
+    services: [
+      {
+        name: "my-service",
+        image: image,
+        volumes: volumes,
+        ports: ports,
+      },
+    ],
+  };
+
+  const output = JSON.stringify(compose, null, 2);
+
+  console.log(output);
+});
+</script>
