@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Compose Configurator</title>
+<script>
+function updateYAML() {
+    var version = document.getElementById("versionInput").value;
+    var port = document.getElementById("portInput").value;
+    var uploadLimit = document.getElementById("uploadLimitInput").value;
+    var memoryLimit = document.getElementById("memoryLimitInput").value;
+    var executionTime = document.getElementById("executionTimeInput").value;
+
+    var yamlContent = 
+        "version: '" + version + "'\n" +
+        "services:\n" +
+        "  phpmyadmin:\n" +
+        "    container_name: phpmyadmin\n" +
+        "    image: phpmyadmin\n" +
+        "    restart: always\n" +
+        "    ports:\n" +
+        "      - " + port + ":80\n" +
+        "    networks:\n" +
+        "      - network1\n" +
+        "    environment:\n" +
+        "      - PMA_ARBITRARY=1\n" +
+        "      - UPLOAD_LIMIT=" + uploadLimit + "M\n" +
+        "      - MEMORY_LIMIT=" + memoryLimit + "M\n" +
+        "      - MAX_EXECUTION_TIME=" + executionTime + "\n" +
+        "    volumes:\n" +
+        "      - /srv/phpmyadmin/php/php.ini:/usr/local/etc/php/php.ini\n" +
+        "networks:\n" +
+        "  network1:\n" +
+        "    external: true";
+
+    // Display the YAML content
+    document.getElementById("yamlOutput").textContent = yamlContent;
+
+    // Create a Blob for the YAML file
+    var blob = new Blob([yamlContent], { type: 'text/yaml;charset=utf-8;' });
+    
+    // Create download link
+    var downloadLink = document.getElementById("downloadLink");
+    downloadLink.setAttribute("href", URL.createObjectURL(blob));
+    downloadLink.setAttribute("download", "docker-compose.yaml");
+    downloadLink.style.display = 'inline';
+}
+</script>
+</head>
+<body>
+<h1>Docker Compose Configurator</h1>
+
+<form id="yamlForm">
+    <label for="versionInput">Compose version:</label><br>
+    <input type="text" id="versionInput" name="version" value="3.8"><br><br>
+    
+    <label for="portInput">Port:</label><br>
+    <input type="text" id="portInput" name="port" value="80"><br><br>
+    
+    <label for="uploadLimitInput">Upload Limit (M):</label><br>
+    <input type="number" id="uploadLimitInput" name="uploadLimit" value="256"><br><br>
+    
+    <label for="memoryLimitInput">Memory Limit (M):</label><br>
+    <input type="number" id="memoryLimitInput" name="memoryLimit" value="512"><br><br>
+    
+    <label for="executionTimeInput">Max Execution Time:</label><br>
+    <input type="number" id="executionTimeInput" name="executionTime" value="600"><br><br>
+    
+    <button type="button" onclick="updateYAML()">Generate YAML</button>
+</form>
+
+<h2>Your docker-compose.yaml:</h2>
+<pre id="yamlOutput">
+<!-- YAML content will be displayed here -->
+</pre>
+
+<!-- Hidden download link, will be displayed after generating the file -->
+<a id="downloadLink" style="display:none;">Download YAML file</a>
+
+</body>
+</html>
