@@ -1,22 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Xử lý dữ liệu nhập từ form</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hello Message</title>
+<script>
+function greetUser() {
+    // Get the user input from the form
+    var userInput = document.getElementById('userInput').value;
+
+    // Create the greeting message
+    var greeting = "Hello, " + userInput + "!";
+
+    // Display the greeting message on the screen
+    document.getElementById('greetingDisplay').innerText = greeting;
+
+    // Prevent the form from submitting
+    return false;
+}
+</script>
 </head>
 <body>
-    <h2>Nhập dữ liệu</h2>
-    <form id="myForm">
-        <label for="inputData">Nhập dữ liệu:</label><br>
-        <input type="text" id="inputData" name="inputData"><br>
-        <input type="button" value="Xác nhận" onclick="displayData()">
-    </form>
-    <p id="result"></p>
-
-    <script>
-        function displayData() {
-            var input = document.getElementById("inputData").value;
-            document.getElementById("result").innerHTML = "Bạn đã nhập: " + input;
-        }
-    </script>
+<h1>Hello Greeting Generator</h1>
+<form onsubmit="return greetUser();">
+    <label for="userInput">Enter your name:</label>
+    <input type="text" id="userInput" required>
+    <input type="submit" value="Greet Me!">
+</form>
+<p id="greetingDisplay"></p>
 </body>
 </html>
