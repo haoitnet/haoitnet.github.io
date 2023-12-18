@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Tạo Tập Tin YAML từ Form</title>
+</head>
+<body>
+
+<h2>Nhập Chuỗi để Tạo Tập Tin YAML</h2>
+
+<form id="yamlForm">
+  <label for="userString">Nhập chuỗi của bạn:</label><br>
+  <input type="text" id="userString" name="userString" required>
+  <input type="submit" value="Tạo Tập Tin YAML">
+</form>
+
+<script>
+  document.getElementById("yamlForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    
+    // Lấy giá trị từ input
+    var userString = document.getElementById("userString").value;
+    
+    // Tạo nội dung cho tập tin YAML
+    var yamlContent = "Hello\n" + userString;
+    
+    // Chuyển đổi các ký tự đặc biệt thành các đối tượng blob
+    var blob = new Blob([yamlContent], {type: "text/yaml;charset=utf-8"});
+    
+    // Tạo URL tạm thời và tải xuống
+    if (window.navigator.msSaveOrOpenBlob) {
+      // IE10+
+      window.navigator.msSaveBlob(blob, "abc.yaml");
+    } else {
+      // Các trình duyệt khác
+      var a = document.createElement("a"),
+          url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = "abc.yaml";
+      document.body.appendChild(a);
+      a.click();
+      
+      // Xóa liên kết và thu hồi bộ nhớ
+      setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);  
+      }, 0); 
+    }
+  });
+</script>
+
+</body>
+</html>
