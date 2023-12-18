@@ -2,31 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hello Message</title>
+<title>Docker Compose Customizer</title>
 <script>
-function greetUser() {
-    // Get the user input from the form
-    var userInput = document.getElementById('userInput').value;
+function generateYAML() {
+    var template = `version: '3'
+services:
+  jira:
+    image: "atlassian/jira-core:%%JIRA_VERSION%%"
+    restart: always
+    ports:
+      - "%%JIRA_PORT%%"
+    environment:
+      - ATL_JDBC_URL=jdbc:postgresql://jira_db:5432/jira?user=%%DB_USER%%&password=%%DB_PASSWORD%%
+      - ATL_DB_DRIVER=org.postgresql.Driver
+      - ATL_DB_USER=%%DB_USER%%
+      - ATL_DB_PASSWORD=%%DB_PASSWORD%%
+    depends_on:
+      - jira_db
+    
+  jira_db:
+    image: "postgres:%%POSTGRES_VERSION%%"
+    restart: always
+    volumes:
+      - jira_db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=jiradb
+      - POSTGRES_USER=%%DB_USER%%
+      - POSTGRES_PASSWORD=%%DB_PASSWORD%%
+volumes:
+  jira_data:
+  jira_db_data:
+`;
 
-    // Create the greeting message
-    var greeting = "Hello, " + userInput + "!";
+    // Replace placeholders with form values
+    template = template.replace(/%%JIRA_VERSION%%/g, document.getElementById("jiraVersion").value);
+    template = template.replace(/%%JIRA_PORT%%/g, document.getElementById("jiraPort").value + ":8080");
+    template = template.replace(/%%DB_USER%%/g, document.getElementById("dbUser").value);
+    template = template.replace(/%%DB_PASSWORD%%/g, document.getElementById("dbPassword").value);
+    template = template.replace(/%%POSTGRES_VERSION%%/g, document.getElementById("postgresVersion").value);
 
-    // Display the greeting message on the screen
-    document.getElementById('greetingDisplay').innerText = greeting;
+    // Create a Blob with the yaml content
+    var blob = new Blob([template], {type: "text/yaml"});
 
-    // Prevent the form from submitting
-    return false;
+    // Create a link element
+    var downloadLink = document.createElement("a");
+    downloadLink.download = "docker-compose.yaml";
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.style.display = "none";
+
+    // Append to the dom and trigger the download
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
 }
 </script>
 </head>
 <body>
-<h1>Hello Greeting Generator</h1>
-<form onsubmit="return greetUser();">
-    <label for="userInput">Enter your name:</label>
-    <input type="text" id="userInput" required>
-    <input type="submit" value="Greet Me!">
+
+<h1>Docker Compose File Customizer</h1>
+
+<form id="customizeForm">
+    Jira Core Version: <input type="text" id="jiraVersion" value="9.11.2-jdk11"><br>
+    Jira Port Mapping: <input type="text" id="jiraPort" value="8080"><br>
+    Postgres Version: <input type="text" id="postgresVersion" value="10.5"><br>
+    DB User: <input type="text" id="dbUser" value="jiradbadmin"><br>
+    DB Password: <input type="text" id="dbPassword" value="jirapassword"><br>
+    <input type="button" value="Generate" onclick="generateYAML()">
 </form>
-<p id="greetingDisplay"></p>
+
 </body>
 </html>

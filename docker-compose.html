@@ -1,53 +1,74 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tạo Tập Tin YAML từ Form</title>
+<title>Docker Compose Editor</title>
+<script>
+  function generateYAML() {
+    // Get values from the form
+    var imageValue = document.getElementById('imageInput').value;
+    var portValue = document.getElementById('portInput').value;
+    var volumeValue = document.getElementById('volumeInput').value;
+
+    // Original YAML template
+    var yamlContent = `
+version: '3'
+services:
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadminimage
+    restart: always
+    ports:
+      - 8282:80
+    networks:
+      - net1
+    environment:
+      - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=256M
+      - MEMORY_LIMIT=512M
+      - MAX_EXECUTION_TIME=600
+    volumes:
+      - /phpmyadmin/php/php.ini:/usr/local/etc/php/php.ini
+networks:
+  net1:
+    external: true`;
+
+    // Replace content in the template
+    yamlContent = yamlContent.replace('phpmyadminimage', imageValue);
+    yamlContent = yamlContent.replace('8282', portValue);
+    yamlContent = yamlContent.replace('/phpmyadmin/php/php.ini', volumeValue);
+
+    // Show the yaml content in a div
+    document.getElementById('yamlOutput').textContent = yamlContent;
+
+    // Download the file
+    var blob = new Blob([yamlContent], {type: 'text/plain'});
+    var link = document.createElement('a');
+    link.download = 'docker-compose.yaml';
+    link.href = window.URL.createObjectURL(blob);
+    link.click();
+  }
+</script>
 </head>
 <body>
 
-<h2>Nhập Chuỗi để Tạo Tập Tin YAML</h2>
+<h2>Docker Compose YAML Editor</h2>
 
-<form id="yamlForm">
-  <label for="userString">Nhập chuỗi của bạn:</label><br>
-  <input type="text" id="userString" name="userString" required>
-  <input type="submit" value="Tạo Tập Tin YAML">
+<form>
+  <label for="imageInput">Image:</label><br>
+  <input type="text" id="imageInput" name="imageInput" placeholder="phpmyadminimage"><br>
+
+  <label for="portInput">Port:</label><br>
+  <input type="text" id="portInput" name="portInput" placeholder="8282"><br>
+
+  <label for="volumeInput">Volume:</label><br>
+  <input type="text" id="volumeInput" name="volumeInput" placeholder="/phpmyadmin/php/php.ini"><br>
+
+  <input type="button" value="Generate and Download YAML" onclick="generateYAML()">
 </form>
 
-<script>
-  document.getElementById("yamlForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    
-    // Lấy giá trị từ input
-    var userString = document.getElementById("userString").value;
-    
-    // Tạo nội dung cho tập tin YAML
-    var yamlContent = "Hello\n" + userString;
-    
-    // Chuyển đổi các ký tự đặc biệt thành các đối tượng blob
-    var blob = new Blob([yamlContent], {type: "text/yaml;charset=utf-8"});
-    
-    // Tạo URL tạm thời và tải xuống
-    if (window.navigator.msSaveOrOpenBlob) {
-      // IE10+
-      window.navigator.msSaveBlob(blob, "abc.yaml");
-    } else {
-      // Các trình duyệt khác
-      var a = document.createElement("a"),
-          url = URL.createObjectURL(blob);
-      a.href = url;
-      a.download = "abc.yaml";
-      document.body.appendChild(a);
-      a.click();
-      
-      // Xóa liên kết và thu hồi bộ nhớ
-      setTimeout(function() {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);  
-      }, 0); 
-    }
-  });
-</script>
+<h3>Generated docker-compose.yaml:</h3>
+<pre id="yamlOutput"></pre>
 
 </body>
 </html>
