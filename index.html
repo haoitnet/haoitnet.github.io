@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Docker Compose Configurator</title>
 <script>
+
+
 function updateYAML() {
     var version = document.getElementById("versionInput").value;
     var port = document.getElementById("portInput").value;
@@ -15,6 +17,7 @@ function updateYAML() {
     var executionTime = document.getElementById("executionTimeInput").value;
     var networkName = document.getElementById("networkNameInput").value;
     var volume = document.getElementById("volumeInput").value;
+    if(document.getElementById('restartAlways').checked){ var restartAlwaysValue = "always"; } else { var restartAlwaysValue = "no";}
 
     var yamlContent = 
         "version: '" + version + "'\n" +
@@ -22,7 +25,7 @@ function updateYAML() {
         "  phpmyadmin:\n" +
         "    container_name: '" + containerName + "'\n" +
         "    image: '" + imageName + "'\n" +
-        "    restart: always\n" +
+        "    restart: " + restartAlwaysValue + "\n" +
         "    ports:\n" +
         "      - " + port + ":80\n" +
         "    networks:\n" +
@@ -145,6 +148,9 @@ pre {
     <label for="imageNameInput">Image Name:</label><br>
     <input type="text" id="imageNameInput" name="imageName" value="phpmyadmin:latest"><br><br>
     
+    <label for="restartAlways">Restart</label>
+    <input type="checkbox" id="restartAlways" name="restartAlways" checked >Always<br><br>
+
     <label for="portInput">Port:</label><br>
     <input type="text" id="portInput" name="port" value="80"><br><br>
     
