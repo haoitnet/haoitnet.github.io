@@ -2,73 +2,179 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Docker Compose Customizer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Compose Configurator</title>
 <script>
-function generateYAML() {
-    var template = `version: '3'
-services:
-  jira:
-    image: "atlassian/jira-core:%%JIRA_VERSION%%"
-    restart: always
-    ports:
-      - "%%JIRA_PORT%%"
-    environment:
-      - ATL_JDBC_URL=jdbc:postgresql://jira_db:5432/jira?user=%%DB_USER%%&password=%%DB_PASSWORD%%
-      - ATL_DB_DRIVER=org.postgresql.Driver
-      - ATL_DB_USER=%%DB_USER%%
-      - ATL_DB_PASSWORD=%%DB_PASSWORD%%
-    depends_on:
-      - jira_db
+function updateYAML() {
+    var version = document.getElementById("versionInput").value;
+    var port = document.getElementById("portInput").value;
+    var containerName = document.getElementById("containerNameInput").value;
+    var imageName = document.getElementById("imageNameInput").value;
+    var uploadLimit = document.getElementById("uploadLimitInput").value;
+    var memoryLimit = document.getElementById("memoryLimitInput").value;
+    var executionTime = document.getElementById("executionTimeInput").value;
+    var networkName = document.getElementById("networkNameInput").value;
+    var volume = document.getElementById("volumeInput").value;
+
+    var yamlContent = 
+        "version: '" + version + "'\n" +
+        "services:\n" +
+        "  phpmyadmin:\n" +
+        "    container_name: '" + containerName + "'\n" +
+        "    image: '" + imageName + "'\n" +
+        "    restart: always\n" +
+        "    ports:\n" +
+        "      - " + port + ":80\n" +
+        "    networks:\n" +
+        "      - " + networkName + "\n" +
+        "    environment:\n" +
+        "      - PMA_ARBITRARY=1\n" +
+        "      - UPLOAD_LIMIT=" + uploadLimit + "M\n" +
+        "      - MEMORY_LIMIT=" + memoryLimit + "M\n" +
+        "      - MAX_EXECUTION_TIME=" + executionTime + "\n" +
+        "    volumes:\n" +
+        "      - " + volume + ":/usr/local/etc/php/php.ini\n" +
+        "networks:\n" +
+        "  " + networkName + ":\n" +
+        "    external: true";
+
+    // Display the YAML content
+    document.getElementById("yamlOutput").textContent = yamlContent;
+
+    // Create a Blob for the YAML file
+    var blob = new Blob([yamlContent], { type: 'text/yaml;charset=utf-8;' });
     
-  jira_db:
-    image: "postgres:%%POSTGRES_VERSION%%"
-    restart: always
-    volumes:
-      - jira_db_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=jiradb
-      - POSTGRES_USER=%%DB_USER%%
-      - POSTGRES_PASSWORD=%%DB_PASSWORD%%
-volumes:
-  jira_data:
-  jira_db_data:
-`;
-
-    // Replace placeholders with form values
-    template = template.replace(/%%JIRA_VERSION%%/g, document.getElementById("jiraVersion").value);
-    template = template.replace(/%%JIRA_PORT%%/g, document.getElementById("jiraPort").value + ":8080");
-    template = template.replace(/%%DB_USER%%/g, document.getElementById("dbUser").value);
-    template = template.replace(/%%DB_PASSWORD%%/g, document.getElementById("dbPassword").value);
-    template = template.replace(/%%POSTGRES_VERSION%%/g, document.getElementById("postgresVersion").value);
-
-    // Create a Blob with the yaml content
-    var blob = new Blob([template], {type: "text/yaml"});
-
-    // Create a link element
-    var downloadLink = document.createElement("a");
-    downloadLink.download = "docker-compose.yaml";
-    downloadLink.href = window.URL.createObjectURL(blob);
-    downloadLink.style.display = "none";
-
-    // Append to the dom and trigger the download
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    // Create download link
+    var downloadLink = document.getElementById("downloadLink");
+    downloadLink.setAttribute("href", URL.createObjectURL(blob));
+    downloadLink.setAttribute("download", "docker-compose.yaml");
+    downloadLink.style.display = 'inline';
 }
 </script>
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f4f4f4;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="number"],
+button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+button {
+    background: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+pre {
+    background: #fafafa;
+    border-left: 5px solid #3498db;
+    padding: 10px;
+    overflow: auto;
+    margin-top: 20px;
+}
+
+#downloadLink {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    background: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+#downloadLink:hover {
+    background: #219150;
+}
+</style>
 </head>
 <body>
+<h1><center>PhpMyAdmin - Docker Compose</center></h1>
 
-<h1>Docker Compose File Customizer</h1>
+<form id="yamlForm">
+    <label for="versionInput">Compose version:</label><br>
+    <input type="text" id="versionInput" name="version" value="3.8"><br><br>
 
-<form id="customizeForm">
-    Jira Core Version: <input type="text" id="jiraVersion" value="9.11.2-jdk11"><br>
-    Jira Port Mapping: <input type="text" id="jiraPort" value="8080"><br>
-    Postgres Version: <input type="text" id="postgresVersion" value="10.5"><br>
-    DB User: <input type="text" id="dbUser" value="jiradbadmin"><br>
-    DB Password: <input type="text" id="dbPassword" value="jirapassword"><br>
-    <input type="button" value="Generate" onclick="generateYAML()">
+    <label for="containerNameInput">Container Name:</label><br>
+    <input type="text" id="containerNameInput" name="containerName" value="phpmyadmin"><br><br>
+
+    <label for="imageNameInput">Image Name:</label><br>
+    <input type="text" id="imageNameInput" name="imageName" value="phpmyadmin:latest"><br><br>
+    
+    <label for="portInput">Port:</label><br>
+    <input type="text" id="portInput" name="port" value="80"><br><br>
+    
+    <label for="uploadLimitInput">Upload Limit (M):</label><br>
+    <input type="number" id="uploadLimitInput" name="uploadLimit" value="256"><br><br>
+    
+    <label for="memoryLimitInput">Memory Limit (M):</label><br>
+    <input type="number" id="memoryLimitInput" name="memoryLimit" value="512"><br><br>
+    
+    <label for="executionTimeInput">Max Execution Time:</label><br>
+    <input type="number" id="executionTimeInput" name="executionTime" value="600"><br><br>
+
+    <label for="networkNameInput">Network Name:</label><br>
+    <input type="text" id="networkNameInput" name="networkName" value="mynetwork01"><br><br>
+
+    <label for="volumeInput">Volume for php.ini:</label><br>
+    <input type="text" id="volumeInput" name="volume" value="/srv/phpmyadmin/php/php.ini"><br><br>
+
+    
+    
+    <button type="button" onclick="updateYAML()">Generate YAML</button>
 </form>
+
+<h2><center>Your docker-compose.yaml:</center></h2>
+<pre id="yamlOutput" style="background-color: #ccc;">
+<!-- YAML content will be displayed here -->
+</pre>
+
+<!-- Hidden download link, will be displayed after generating the file -->
+<center><a id="downloadLink" style="display:none;">Download YAML file</a></center>
 
 </body>
 </html>
